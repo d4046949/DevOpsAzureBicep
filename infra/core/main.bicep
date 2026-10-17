@@ -27,7 +27,7 @@ param env string
 
 var region = getRegionAbbreviation(location)
 
-var kvName = 'kv-playpitcore01-${env}-${region}'
+var kvName = 'kv-playpitcore02-${env}-${region}'
 var planName = 'asp-playpit-${env}-${region}'
 var virtualNetworkName string = 'vnet-playpit-${env}-01'
 
