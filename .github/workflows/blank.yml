@@ -15,7 +15,7 @@ permissions:
 jobs:
 
   provision:
-    name: Wake up ACI instance
+    name: What-if for infra
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +25,9 @@ jobs:
        #    echo "Repository ID: $GITHUB_REPOSITORY_ID"
        #  env:
        #    GITHUB_REPOSITORY_ID: ${{ github.repository_id }}
-  
+       - name: Checkout repository
+         uses: actions/checkout@v4
+         
        - name: Login to Azure
          uses: azure/login@v3
          with:
