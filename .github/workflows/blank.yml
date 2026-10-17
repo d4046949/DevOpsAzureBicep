@@ -13,7 +13,13 @@ permissions:
   actions: write
 
 jobs:
-
+  lint:
+    name: Lint Bicep
+    runs-on: ubuntu-latest
+    steps:
+       - name: Checkout repository
+         uses: actions/checkout@v4 
+      
   provision:
     name: What-if for infra
     runs-on: ubuntu-latest
