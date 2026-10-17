@@ -37,5 +37,5 @@ jobs:
          with:
           inlineScript: |
               az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-              az deployment sub what-if --resource-group "${{ secrets.AZURE_CORE_RESOURCE_GROUP }}" --name "github-actions-whatif" --template-file ./infra/core/main.bicep --parameters ./infra/core/dev.bicepparam
+              az deployment group what-if --resource-group "${{ secrets.AZURE_CORE_RESOURCE_GROUP }}" --name "github-actions-whatif" --template-file ./infra/core/main.bicep --parameters ./infra/core/dev.bicepparam
 
