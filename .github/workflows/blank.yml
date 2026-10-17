@@ -21,7 +21,11 @@ jobs:
     steps:
 
        - name: Show repository ID
-         run: echo "Repository ID: ${{ github.repository_id }}"
+         shell: bash
+         run: |
+           echo "Repository ID: $GITHUB_REPOSITORY_ID"
+         env:
+           GITHUB_REPOSITORY_ID: ${{ github.repository_id }}
   
        - name: Login to Azure
          uses: azure/login@v3
