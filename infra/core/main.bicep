@@ -45,6 +45,12 @@ module keyVault './modules/key-vault.bicep' = {
     tags:tags
     virtualNetworkName: virtualNetwork.name
     vnid: virtualNetwork.id
+    privateEndpointSubnetId: resourceId(
+  'Microsoft.Network/virtualNetworks/subnets',
+  virtualNetworkName,
+  privateEndpointSubnetName
+) 
+    privateEndpointName: 'pe-${kvName}'
   }
 }
 
