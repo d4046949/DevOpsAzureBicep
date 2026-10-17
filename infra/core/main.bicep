@@ -22,7 +22,9 @@ param location string = resourceGroup().location
 param env string
 
 var region = getRegionAbbreviation(location)
+
 var kvName = 'kv-playpitcore-${env}-${region}'
+var planName = 'asp-playpit-${env}-${region}'
 
 resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
   name: kvName
@@ -42,6 +44,23 @@ resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
       bypass: 'None'
     }
     accessPolicies: []
+  }
+  tags: tags
+}
+
+// App Service Plan - Basic B1 Linux
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
+  name: planName
+  location: location
+  kind: 'linux'
+  sku: {
+    name: 'B1'
+    tier: 'Basic'
+    size: 'B1'
+    capacity: 1
+  }
+  properties: {
+    reserved: true
   }
   tags: tags
 }
