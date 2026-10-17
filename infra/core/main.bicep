@@ -55,21 +55,12 @@ module keyVault './modules/key-vault.bicep' = {
 }
 
 
-// App Service Plan - Basic B1 Linux
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
-  name: planName
-  location: location
-  kind: 'linux'
-  sku: {
-    name: 'F1'
-    tier: 'Free'
-    size: 'F1'
-    capacity: 1
+module appServicePlan './modules/app-service-plan.bicep' = {
+  params: {
+    name: planName
+    location: location
+    tags:tags
   }
-  properties: {
-    reserved: true
-  }
-  tags: tags
 }
 
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {

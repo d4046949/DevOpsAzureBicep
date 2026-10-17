@@ -3,8 +3,14 @@ name: Core Build & release
 on:
   push:
     branches: ["main"]
+    paths:
+      - 'infra/core/**'
+
   pull_request:
     branches: ["main"]
+    paths:
+      - 'infra/core/**'
+
   workflow_dispatch:
 
 permissions:
