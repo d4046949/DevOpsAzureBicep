@@ -10,6 +10,10 @@ var tags = {
   env: env
 }
 
+param vnetAddress string = '10.0.0.0/16'
+param subnet1 string
+param subnet2 string
+
 @description('Resource location, defaults to the resource group')
 param location string = resourceGroup().location
 
@@ -25,28 +29,13 @@ var region = getRegionAbbreviation(location)
 
 var kvName = 'kv-playpitcore-${env}-${region}'
 var planName = 'asp-playpit-${env}-${region}'
+var virtualNetworkName string = 'vnet-playpit-${env}-01'
 
-// resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-//   name: kvName
-//   location: location
-//   properties: {
-//     tenantId: tenant().tenantId
-//     sku: {
-//       family: 'A'
-//       name: 'standard'
-//     }
-//     enableRbacAuthorization: true
-//     enableSoftDelete: true
-//     softDeleteRetentionInDays: 90
+@description('App Service integration subnet name')
+param integrationSubnetName string = 'snet-app-integration'
 
-//     publicNetworkAccess: 'Enabled'
-//     networkAcls: {
-//       bypass: 'None'
-//     }
-//     accessPolicies: []
-//   }
-//   tags: tags
-// }
+@description('Private Endpoint subnet name')
+param privateEndpointSubnetName string = 'snet-private-endpoints'
 
 module keyVault './modules/key-vault.bicep' = {
   params: {
@@ -56,7 +45,6 @@ module keyVault './modules/key-vault.bicep' = {
     tags:tags
   }
 }
-
 
 
 // App Service Plan - Basic B1 Linux
@@ -72,6 +60,41 @@ resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   }
   properties: {
     reserved: true
+  }
+  tags: tags
+}
+
+resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
+  name: virtualNetworkName
+  location: location
+  properties: {
+    addressSpace: {
+      addressPrefixes: [
+        vnetAddress
+      ]
+    }
+    subnets: [
+      {
+        name: integrationSubnetName
+        properties: {
+          addressPrefix: subnet1
+          delegations: [
+            {
+              name: 'appServiceDelegation'
+              properties: {
+                serviceName: 'Microsoft.Web/serverFarms'
+              }
+            }
+          ]
+        }
+      }
+      {
+        name: privateEndpointSubnetName
+        properties: {
+          addressPrefix: subnet2
+        }
+      }
+    ]
   }
   tags: tags
 }
