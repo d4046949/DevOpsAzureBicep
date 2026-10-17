@@ -43,6 +43,8 @@ module keyVault './modules/key-vault.bicep' = {
     location: location
     environment: env
     tags:tags
+    virtualNetworkName: virtualNetwork.name
+    vnid: virtualNetwork.id
   }
 }
 
@@ -99,20 +101,4 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
   tags: tags
 }
 
-resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
-  name: 'privatelink.vaultcore.azure.net'
-  location: 'global'
-  tags: tags
-}
 
-resource privateDnsVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
-  parent: keyVaultPrivateDnsZone
-  name: '${virtualNetworkName}-link'
-  location: 'global'
-  properties: {
-    registrationEnabled: false
-    virtualNetwork: {
-      id: virtualNetwork.id
-    }
-  }
-}

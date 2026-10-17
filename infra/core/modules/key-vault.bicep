@@ -10,10 +10,31 @@ param environment string
 @description('Resource tags.')
 param tags object
 
+param virtualNetworkName string
+
+param vnid string 
 @description('Number of days to retain soft-deleted items.')
 @minValue(7)
 @maxValue(90)
 param softDeleteRetentionInDays int = 90
+
+resource keyVaultPrivateDnsZone 'Microsoft.Network/privateDnsZones@2020-06-01' = {
+  name: 'privatelink.vaultcore.azure.net'
+  location: 'global'
+  tags: tags
+}
+
+resource privateDnsVnetLink 'Microsoft.Network/privateDnsZones/virtualNetworkLinks@2020-06-01' = {
+  parent: keyVaultPrivateDnsZone
+  name: '${virtualNetworkName}-link'
+  location: 'global'
+  properties: {
+    registrationEnabled: false
+    virtualNetwork: {
+      id: vnid
+    }
+  }
+}
 
 resource keyVault 'Microsoft.KeyVault/vaults@2025-05-01' = {
   name: name
