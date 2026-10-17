@@ -19,11 +19,20 @@ jobs:
     steps:
        - name: Checkout repository
          uses: actions/checkout@v4 
-      
+
+       - name: Compile and lint Bicep
+         uses: azure/cli@v2
+         with:
+           inlineScript: |
+            az bicep version
+            az bicep build \
+              --file ./infra/core/main.bicep
+              
   provision:
     name: What-if for infra
     runs-on: ubuntu-latest
-
+    needs: lint
+    
     steps:
        #- name: Show repository ID
        #  shell: bash
