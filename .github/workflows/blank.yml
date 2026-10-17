@@ -1,4 +1,4 @@
-name: Build Core CI
+name: Docker Image CI
 
 on:
   push:
@@ -7,18 +7,22 @@ on:
     branches: ["main"]
   workflow_dispatch:
 
-  permissions:
-    id-token: write
+permissions:
+  id-token: write
+  contents: read
+  actions: write
 
-  jobs:
-    provision:
-      name: Wake up ACI instance
-      runs-on: ubuntu-latest
+jobs:
 
-      steps:
-        - name: Login to Azure
-          uses: azure/login@v3
-          with:
-            client-id: ${{ secrets.AZURE_CLIENT_ID }}
-            tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-            subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+  provision:
+    name: Wake up ACI instance
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Login to Azure
+         uses: azure/login@v3
+         with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
