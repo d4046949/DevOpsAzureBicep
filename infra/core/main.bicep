@@ -26,27 +26,38 @@ var region = getRegionAbbreviation(location)
 var kvName = 'kv-playpitcore-${env}-${region}'
 var planName = 'asp-playpit-${env}-${region}'
 
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
-  name: kvName
-  location: location
-  properties: {
-    tenantId: tenant().tenantId
-    sku: {
-      family: 'A'
-      name: 'standard'
-    }
-    enableRbacAuthorization: true
-    enableSoftDelete: true
-    softDeleteRetentionInDays: 90
+// resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' = {
+//   name: kvName
+//   location: location
+//   properties: {
+//     tenantId: tenant().tenantId
+//     sku: {
+//       family: 'A'
+//       name: 'standard'
+//     }
+//     enableRbacAuthorization: true
+//     enableSoftDelete: true
+//     softDeleteRetentionInDays: 90
 
-    publicNetworkAccess: 'Enabled'
-    networkAcls: {
-      bypass: 'None'
-    }
-    accessPolicies: []
+//     publicNetworkAccess: 'Enabled'
+//     networkAcls: {
+//       bypass: 'None'
+//     }
+//     accessPolicies: []
+//   }
+//   tags: tags
+// }
+
+module keyVault './modules/key-vault.bicep' = {
+  params: {
+    name: kvName
+    location: location
+    environment: env
+    tags:tags
   }
-  tags: tags
 }
+
+
 
 // App Service Plan - Basic B1 Linux
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
