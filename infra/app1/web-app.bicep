@@ -5,6 +5,8 @@ targetScope = 'resourceGroup'
 param env string
 
 param location string = resourceGroup().location
+
+
 param appServicePlanResourceGroup string = ''
 
 var region = getRegionAbbreviation(location)
