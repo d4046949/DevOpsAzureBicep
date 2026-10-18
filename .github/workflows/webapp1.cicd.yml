@@ -71,5 +71,9 @@ jobs:
          with:
           inlineScript: |
               az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-              az deployment group create --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}"  --template-file ./infra/app1/web-app.bicep --parameters ./infra/app1/dev.bicepparam
+              az deployment group create \
+              --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
+              --template-file ./infra/app1/web-app.bicep \
+              --parameters ./infra/app1/dev.bicepparam
+              appServicePlanResourceGroup="${{ secrets.AZURE_CORE_RESOURCE_GROUP }}"
 
