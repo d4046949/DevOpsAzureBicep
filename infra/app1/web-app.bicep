@@ -45,3 +45,12 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
     }
   }
 }
+
+module keyVaultRoleAssignment './modules/user-permissions.bicep' = {
+  name: 'keyVaultRoleAssignment'
+  scope: resourceGroup(appServicePlanResourceGroup)
+  params: {
+    keyVaultName: kvName
+    principalId: webApp.identity.principalId
+  }
+}
