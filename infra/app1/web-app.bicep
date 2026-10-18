@@ -7,7 +7,7 @@ param env string
 param location string = resourceGroup().location
 
 
-param appServicePlanResourceGroup string = ''
+param appServicePlanResourceGroup string = 'jr-playpit-core-rg'
 
 var region = getRegionAbbreviation(location)
 var planName = 'asp-playpit-${env}-${region}'
