@@ -66,7 +66,7 @@ jobs:
               az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
               az deployment group what-if --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" --name "github-actions-webapp1" --template-file ./infra/app1/web-app.bicep --parameters ./infra/app1/dev.bicepparam
 
-              - name:  Bicep deployment
+       - name:  Bicep deployment
          uses: azure/cli@v2
          with:
           inlineScript: |
