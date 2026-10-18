@@ -1,4 +1,4 @@
-name: Core Build & release
+name: WebApp1 Build & release
 
 on:
   workflow_dispatch:
