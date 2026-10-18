@@ -1,0 +1,35 @@
+name: Bicep Policy and Security Checks
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'infra/core/**'
+      - '.github/workflows/core.yml'
+      - 'ps-rule.yaml'
+
+  push:
+    branches: ["main"]
+    paths:
+      - 'infra/core/**'
+      - '.github/workflows/core.yml'
+      - 'ps-rule.yaml'
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  psrule:
+    name: PSRule for Azure
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Analyse Bicep templates
+        uses: microsoft/ps-rule@v2.9.0
+        with:
+          modules: PSRule.Rules.Azur
