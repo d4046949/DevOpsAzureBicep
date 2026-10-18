@@ -113,7 +113,7 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         properties: {
           addressPrefix: subnet2    
           networkSecurityGroup: {
-      id: appIntegrationNsg.id
+      id: privateEndpointsNsg.id
     }
         }
       }
