@@ -11,6 +11,12 @@ param appServicePlanResourceGroup string = 'jr-playpit-core-rg'
 
 var region = getRegionAbbreviation(location)
 var planName = 'asp-playpit-${env}-${region}'
+var kvName = 'kv-playpitcore04-${env}-${region}'
+
+resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
+  name: kvName
+  scope: resourceGroup(appServicePlanResourceGroup)
+}
 
 resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' existing = {
   name: planName
@@ -26,5 +32,13 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
   properties: {
     serverFarmId: appServicePlan.id
     httpsOnly: true
+    siteConfig: {
+      appSettings: [
+        {
+          name: 'MY_SECRET'
+          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${keyVault})'
+        }
+      ]
+    }
   }
 }
