@@ -1,4 +1,4 @@
 using './web-app.bicep'
 
-param webAppName = 'webapp-1'
+param webAppName = 'jrtestwebapp-1'
 param env = 'dev'
