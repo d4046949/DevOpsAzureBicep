@@ -63,6 +63,24 @@ module appServicePlan './modules/app-service-plan.bicep' = {
   }
 }
 
+// NSG for application integration
+resource appIntegrationNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: 'nsg-app-integration-dev'
+  location: location
+  properties: {
+    securityRules: []
+  }
+}
+
+// NSG for private endpoints
+resource privateEndpointsNsg 'Microsoft.Network/networkSecurityGroups@2023-09-01' = {
+  name: 'nsg-private-endpoints-dev'
+  location: location
+  properties: {
+    securityRules: []
+  }
+}
+
 resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
   name: virtualNetworkName
   location: location
@@ -77,6 +95,9 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
         name: integrationSubnetName
         properties: {
           addressPrefix: subnet1
+          networkSecurityGroup: {
+      id: appIntegrationNsg.id
+    }
           delegations: [
             {
               name: 'appServiceDelegation'
@@ -90,7 +111,10 @@ resource virtualNetwork 'Microsoft.Network/virtualNetworks@2023-11-01' = {
       {
         name: privateEndpointSubnetName
         properties: {
-          addressPrefix: subnet2
+          addressPrefix: subnet2    
+          networkSecurityGroup: {
+      id: appIntegrationNsg.id
+    }
         }
       }
     ]
