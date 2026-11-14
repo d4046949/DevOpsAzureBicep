@@ -62,7 +62,7 @@ param skuName string = 'Free'
 
 resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   name: staticWebAppName
-  location: location
+  location: 'westeurope'
   sku: {
     name: skuName
     tier: skuName
