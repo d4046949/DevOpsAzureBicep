@@ -39,7 +39,7 @@ jobs:
     needs: lint
 
     environment:
-      name: dev
+      name: dev-validation
 
     permissions:
       contents: read
