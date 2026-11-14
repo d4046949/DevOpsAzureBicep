@@ -54,3 +54,17 @@ module keyVaultRoleAssignment './modules/user-permissions.bicep' = {
     principalId: webApp.identity.principalId
   }
 }
+
+@description('Name of the Static Web App')
+param staticWebAppName string = 'my-static-web-app'
+
+param skuName string = 'Free'
+
+resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
+  name: staticWebAppName
+  location: location
+  sku: {
+    name: skuName
+    tier: skuName
+  }
+}
