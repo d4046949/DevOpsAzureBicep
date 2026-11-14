@@ -62,17 +62,79 @@ jobs:
             --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}"  \
             --template-file ./infra/app1/web-app.bicep \
             --parameters ./infra/app1/dev.bicepparam \
-            --result-format FullResourcePayloads \
-            --output json > whatif.json
+            > whatif.txt 2>&1
 
-            echo "## Azure Deployment What-If" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo '```json' >> $GITHUB_STEP_SUMMARY
-            cat whatif.json >> $GITHUB_STEP_SUMMARY
-            echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Generate What-If Markdown Review
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import re
+          import os
+          from pathlib import Path
 
-            echo "What-If results:"
-            cat whatif.json
+          output = Path("whatif.txt").read_text() if Path("whatif.txt").exists() else ""
+
+          changes = {
+              "+": ("Create", []),
+              "~": ("Modify", []),
+              "-": ("Delete", []),
+              "x": ("Unsupported", []),
+              "*": ("Ignore", [])
+          }
+
+          for line in output.splitlines():
+              match = re.match(
+                  r"^\s*([+~\-x*])\s+(Microsoft\.[^\s]+)",
+                  line
+              )
+              if match:
+                  symbol, resource = match.groups()
+                  changes[symbol][1].append(resource)
+
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("# Azure Deployment What-If Review\n\n")
+
+              summary.write("## Proposed changes\n\n")
+
+              for symbol, (label, resources) in changes.items():
+                  summary.write(f"### {label} ({len(resources)})\n\n")
+
+                  if resources:
+                      for resource in resources:
+                          summary.write(f"- `{resource}`\n")
+                  else:
+                      summary.write("- None\n")
+
+                  summary.write("\n")
+
+              summary.write("## Diagnostics\n\n")
+
+              diagnostics = re.search(
+                  r"Diagnostics\s*\(\d+\):([\s\S]*)",
+                  output
+              )
+
+              if diagnostics:
+                  summary.write("```text\n")
+                  summary.write(diagnostics.group(1).strip())
+                  summary.write("\n```\n")
+              else:
+                  summary.write("No diagnostics reported.\n")
+
+              summary.write("\n## Raw output\n\n")
+              summary.write("See the `azure-what-if-app1` workflow artifact for the complete output.\n")
+          PY
+
+          
+      - name: Upload What-If output
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: azure-what-if-app1
+          path: whatif.txt
+          retention-days: 14
+          if-no-files-found: warn
 
       # - name:  Bicep deployment
       #   uses: azure/cli@v2
