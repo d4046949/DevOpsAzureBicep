@@ -59,3 +59,16 @@ resource staticWebApp 'Microsoft.Web/staticSites@2023-12-01' = {
   }
   properties: {}
 }
+
+@description('Name of the Static Web App')
+param staticWebAppName2 string = 'my-static-web-app2'
+
+resource staticWebApp1 'Microsoft.Web/staticSites@2023-12-01' = {
+  name: staticWebAppName2
+  location: 'westeurope'
+  sku: {
+    name: 'Free'
+    tier: 'Free'
+  }
+  properties: {}
+}
