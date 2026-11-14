@@ -6,21 +6,22 @@ param env string
 
 param location string = resourceGroup().location
 
-
-param appServicePlanResourceGroup string = 'jr-playpit-core-rg'
-
 var region = getRegionAbbreviation(location)
 var planName = 'asp-playpit-${env}-${region}'
-var kvName = 'kv-playpitcore04-${env}-${region}'
 
-resource keyVault 'Microsoft.KeyVault/vaults@2023-07-01' existing = {
-  name: kvName
-  scope: resourceGroup(appServicePlanResourceGroup)
-}
-
-resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' existing = {
+resource appServicePlan 'Microsoft.Web/serverfarms@2023-12-01' = {
   name: planName
-  scope: resourceGroup(appServicePlanResourceGroup)
+  location: location
+  kind: 'linux'
+  sku: {
+    name: 'F1'
+    tier: 'Free'
+    size: 'F1'
+    capacity: 1
+  }
+  properties: {
+    reserved: true
+  }
 }
 
 param webAppName string
@@ -39,19 +40,10 @@ resource webApp 'Microsoft.Web/sites@2023-12-01' = {
       appSettings: [
         {
           name: 'MY_SECRET'
-          value: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=${keyVault})'
+          value: 'secret'
         }
       ]
     }
-  }
-}
-
-module keyVaultRoleAssignment './modules/user-permissions.bicep' = {
-  name: 'keyVaultRoleAssignment'
-  scope: resourceGroup(appServicePlanResourceGroup)
-  params: {
-    keyVaultName: kvName
-    principalId: webApp.identity.principalId
   }
 }
 
