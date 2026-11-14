@@ -106,7 +106,7 @@ jobs:
       name: dev
 
     steps:
-      - nasme: Checkout repository
+      - name: Checkout repository
         uses: actions/checkout@v4
          
       - name: Login to Azure
