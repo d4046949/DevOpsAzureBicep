@@ -37,7 +37,7 @@ jobs:
             az bicep build \
               --file ./infra/app1/web-app.bicep
               
-  provision:
+  whatif:
     name: What-if for infra
     runs-on: ubuntu-latest
     needs: lint
@@ -58,18 +58,61 @@ jobs:
         with:
          inlineScript: |
             az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-            az deployment group what-if --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}"  --template-file ./infra/app1/web-app.bicep --parameters ./infra/app1/dev.bicepparam
+            az deployment group what-if \
+            --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}"  \
+            --template-file ./infra/app1/web-app.bicep \
+            --parameters ./infra/app1/dev.bicepparam \
+            --result-format FullResourcePayloads \
+            --output json > whatif.json
 
-      - name:  Bicep deployment
-        uses: azure/cli@v2
-        env:
-          CORE_RG: ${{ secrets.AZURE_CORE_RESOURCE_GROUP }}
-        with:
-          inlineScript: |
-              az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-              az deployment group create \
-              --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
-              --template-file ./infra/app1/web-app.bicep \
-              --parameters ./infra/app1/dev.bicepparam
-              appServicePlanResourceGroup="$CORE_RG"
+            echo "## Azure Deployment What-If" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat whatif.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+
+            echo "What-If results:"
+            cat whatif.json
+
+      # - name:  Bicep deployment
+      #   uses: azure/cli@v2
+      #   env:
+      #     CORE_RG: ${{ secrets.AZURE_CORE_RESOURCE_GROUP }}
+      #   with:
+      #     inlineScript: |
+      #         az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+      #         az deployment group create \
+      #         --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
+      #         --template-file ./infra/app1/web-app.bicep \
+      #         --parameters ./infra/app1/dev.bicepparam
+      #         appServicePlanResourceGroup="$CORE_RG"
+
+  # provision:
+  #   name: What-if for infra
+  #   runs-on: ubuntu-latest
+  #   needs: provision
+    
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+         
+  #     - name: Login to Azure
+  #       uses: azure/login@v3
+  #       with:
+  #        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+  #        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+  #        subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+            
+  #     - name:  Bicep deployment
+  #       uses: azure/cli@v2
+  #       env:
+  #         CORE_RG: ${{ secrets.AZURE_CORE_RESOURCE_GROUP }}
+  #       with:
+  #         inlineScript: |
+  #             az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+  #             az deployment group create \
+  #             --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
+  #             --template-file ./infra/app1/web-app.bicep \
+  #             --parameters ./infra/app1/dev.bicepparam
+  #             appServicePlanResourceGroup="$CORE_RG"
 
