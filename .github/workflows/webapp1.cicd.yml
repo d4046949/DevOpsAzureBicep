@@ -77,6 +77,18 @@ jobs:
         if: always()
         run: dotnet run ./scripts/GenerateWhatIfReport.cs -- whatif.txt
 
+      - name: Debug What-If report files
+        if: always()
+        run: |
+          echo "Working directory:"
+          pwd
+
+          echo "Generated files:"
+          find . -type f \( -name "*.md" -o -name "whatif.txt" \) -print
+
+          echo "Root directory contents:"
+          ls -lah
+          
       - name: Upload What-If output
         uses: actions/upload-artifact@v4
         if: always()
