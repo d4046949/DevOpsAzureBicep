@@ -95,7 +95,7 @@ jobs:
   provision:
     name: deploy infa
     runs-on: ubuntu-latest
-    needs: provision
+    needs: whatif
     
     steps:
       - name: Checkout repository
