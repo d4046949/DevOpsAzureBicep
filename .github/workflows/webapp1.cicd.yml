@@ -3,22 +3,18 @@ name: WebApp1 Build & release
 on:
   workflow_dispatch:
 
-  #push:
-    #branches: ["main"]
-   # paths:
-      #- 'infra/app1/**'
-
-  #pull_request:
-   # branches: ["main"]
-   # paths:
-    #  - 'infra/app1/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'infra/app1/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
       
   
 
 permissions:
-  id-token: write
   contents: read
-  actions: write
 
 jobs:
   lint:
@@ -41,6 +37,13 @@ jobs:
     name: What-if for infra
     runs-on: ubuntu-latest
     needs: lint
+
+    environment:
+      name: dev-validation
+
+    permissions:
+      contents: read
+      id-token: write
     
     steps:
       - name: Checkout repository
@@ -96,7 +99,12 @@ jobs:
     name: deploy infa
     runs-on: ubuntu-latest
     needs: whatif
-    
+        
+    if: github.ref == 'refs/heads/main'
+
+    environment:
+      name: dev
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
