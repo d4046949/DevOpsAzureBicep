@@ -84,18 +84,18 @@ jobs:
 
 
 
-      # - name:  Bicep deployment
-      #   uses: azure/cli@v2
-      #   env:
-      #     CORE_RG: ${{ secrets.AZURE_CORE_RESOURCE_GROUP }}
-      #   with:
-      #     inlineScript: |
-      #         az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
-      #         az deployment group create \
-      #         --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
-      #         --template-file ./infra/app1/web-app.bicep \
-      #         --parameters ./infra/app1/dev.bicepparam
-      #         appServicePlanResourceGroup="$CORE_RG"
+      - name:  Bicep deployment
+        uses: azure/cli@v2
+        env:
+          CORE_RG: ${{ secrets.AZURE_CORE_RESOURCE_GROUP }}
+        with:
+          inlineScript: |
+              az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+              az deployment group create \
+              --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}" \
+              --template-file ./infra/app1/web-app.bicep \
+              --parameters ./infra/app1/dev.bicepparam
+              appServicePlanResourceGroup="$CORE_RG"
 
   # provision:
   #   name: What-if for infra
