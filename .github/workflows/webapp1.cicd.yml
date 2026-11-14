@@ -37,6 +37,9 @@ jobs:
     name: What-if for infra
     runs-on: ubuntu-latest
     needs: lint
+    
+    environment:
+      name: dev
 
     permissions:
       contents: read
