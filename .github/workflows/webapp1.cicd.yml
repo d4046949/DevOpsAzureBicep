@@ -64,6 +64,11 @@ jobs:
             --parameters ./infra/app1/dev.bicepparam \
             > whatif.txt 2>&1
 
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name: Generate What-If Markdown Review
         if: always()
         run: dotnet run ./scripts/GenerateWhatIfReport.cs -- whatif.txt
