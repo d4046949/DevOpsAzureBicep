@@ -37,7 +37,7 @@ jobs:
     name: What-if for infra
     runs-on: ubuntu-latest
     needs: lint
-    
+
     environment:
       name: dev
 
@@ -99,7 +99,10 @@ jobs:
     name: deploy infa
     runs-on: ubuntu-latest
     needs: whatif
-    
+        
+    environment:
+      name: dev
+      
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
