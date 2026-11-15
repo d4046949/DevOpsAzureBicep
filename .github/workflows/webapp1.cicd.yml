@@ -155,6 +155,114 @@ jobs:
             }
 
 
+      - name: Request What-If review
+        if: always() && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pull_number = context.issue.number;
+            const commitSha = context.payload.pull_request.head.sha;
+            const marker = `<!-- azure-what-if-review:${commitSha} -->`;
+            const targetPath = 'infra/app1/web-app.bicep';
+
+            // Avoid creating duplicate review conversations when this
+            // workflow is rerun for the same commit.
+            const existingComments = await github.paginate(
+              github.rest.pulls.listReviewComments,
+              { owner, repo, pull_number, per_page: 100 }
+            );
+
+            if (existingComments.some(c => c.body?.includes(marker))) {
+              core.info('What-If review conversation already exists for this commit.');
+              return;
+            }
+
+            // Find the first added line in the Bicep file.
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner, repo, pull_number, per_page: 100 }
+            );
+
+            const bicepFile = files.find(f => f.filename === targetPath);
+
+            if (!bicepFile?.patch) {
+              core.warning(
+                `No diff available for ${targetPath}. Skipping review conversation.`
+              );
+              return;
+            }
+
+            function findFirstAddedLine(patch) {
+              let newLineNumber = null;
+
+              for (const line of patch.split('\n')) {
+                const hunk = line.match(
+                  /^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/
+                );
+
+                if (hunk) {
+                  newLineNumber = Number(hunk[1]);
+                  continue;
+                }
+
+                if (newLineNumber === null) continue;
+
+                if (line.startsWith('+++') || line.startsWith('---')) {
+                  continue;
+                }
+
+                if (line.startsWith('+')) {
+                  return newLineNumber;
+                }
+
+                if (line.startsWith('-') || line.startsWith('\\')) {
+                  continue;
+                }
+
+                // Context line: advances the new-file line number.
+                newLineNumber++;
+              }
+
+              return null;
+            }
+
+            const line = findFirstAddedLine(bicepFile.patch);
+
+            if (line === null) {
+              core.warning(
+                `No added line found in ${targetPath}. Skipping review conversation.`
+              );
+              return;
+            }
+
+            const body = `${marker}
+            ## Azure Infrastructure What-If review required
+
+            Please review the **Azure Infrastructure What-If** report posted in this pull request.
+
+            Check the proposed resource creations, modifications and deletions against the intended infrastructure changes.
+
+            **Resolve this conversation once the What-If results have been reviewed.**
+
+            Reviewed commit: \`${commitSha}\``;
+
+            await github.rest.pulls.createReviewComment({
+              owner,
+              repo,
+              pull_number,
+              commit_id: commitSha,
+              path: targetPath,
+              line,
+              side: 'RIGHT',
+              body
+            });
+
+            core.info(
+              `Created What-If review conversation on ${targetPath}:${line}.`
+            );
+
+
   provision:
     name: deploy infa
     runs-on: ubuntu-latest
