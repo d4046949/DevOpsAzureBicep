@@ -1,4 +1,4 @@
-name: WebApp1 Build & release
+name: WebApp1 Build & release infra
 
 on:
   workflow_dispatch:
@@ -63,6 +63,11 @@ jobs:
          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
       - name:  Bicep deployment What-If
         uses: azure/cli@v2
         with:
@@ -73,11 +78,6 @@ jobs:
             --template-file ./infra/app1/web-app.bicep \
             --parameters ./infra/app1/dev.bicepparam \
             > whatif.txt 2>&1
-
-      - name: Setup .NET 10
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: '10.0.x'
 
       - name: Generate What-If Markdown Review
         if: always()
