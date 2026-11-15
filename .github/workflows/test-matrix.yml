@@ -7,6 +7,10 @@ jobs:
   whatif:
     name: What-If ${{ matrix.environment }}
     runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      id-token: write
 
     strategy:
       fail-fast: false
@@ -16,6 +20,20 @@ jobs:
     environment: ${{ matrix.environment }}-validation
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Login to Azure
+        uses: azure/login@v3
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Hello environment
+        run: |
+          echo "Successfully logged into Azure for ${{ matrix.environment }}"
+
       - name: Hello environment
         run: |
           echo "Hello from ${{ matrix.environment }}!"
