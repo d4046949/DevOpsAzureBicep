@@ -11,7 +11,13 @@ on:
       - 'scripts/**'
       - '.github/workflows/**'
       
-  
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/app1/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
@@ -272,6 +278,11 @@ jobs:
 
     environment:
       name: dev
+
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
 
     steps:
       - name: Checkout repository
