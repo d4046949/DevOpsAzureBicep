@@ -37,19 +37,81 @@ var symbols = new Dictionary<string, string>
     ["*"] = "Ignore"
 };
 
-// Match resource changes
-var pattern = new Regex(
+// Resource-level changes
+var resourcePattern = new Regex(
     @"^\s*([+~\-x*])\s+(Microsoft\.[^\s]+)",
     RegexOptions.Multiline);
 
-foreach (Match match in pattern.Matches(output))
-{
-    var symbol = match.Groups[1].Value;
-    var resource = match.Groups[2].Value;
+// Property-level changes grouped by resource
+var propertyChanges = new Dictionary<string, List<string>>();
 
-    if (symbols.TryGetValue(symbol, out var category))
+string? currentResource = null;
+int currentResourceIndent = -1;
+
+foreach (var line in output.Split('\n'))
+{
+    if (string.IsNullOrWhiteSpace(line))
+        continue;
+
+    var trimmedLine = line.TrimEnd('\r');
+    var trimmed = trimmedLine.Trim();
+
+    // Ignore headers and diagnostics
+    if (trimmed.StartsWith("Diagnostics"))
+        break;
+
+    // Check for a resource-level change
+    var resourceMatch = Regex.Match(
+        trimmedLine,
+        @"^(\s*)([+~\-x*])\s+(Microsoft\.[^\s]+)");
+
+    if (resourceMatch.Success)
     {
-        changes[category].Add(resource);
+        var indent = resourceMatch.Groups[1].Length;
+        var symbol = resourceMatch.Groups[2].Value;
+        var resource = resourceMatch.Groups[3].Value;
+
+        // Only process top-level resource changes
+        if (indent <= currentResourceIndent || currentResource is null)
+        {
+            if (symbols.TryGetValue(symbol, out var category))
+            {
+                changes[category].Add(resource);
+            }
+
+            currentResource = resource;
+            currentResourceIndent = indent;
+
+            continue;
+        }
+    }
+
+    // If we're not inside a resource, there are no properties to capture
+    if (currentResource is null)
+        continue;
+
+    // Detect property-level changes.
+    // Examples:
+    //     ~ tags
+    //         + Environment: "Development"
+    //         - OldTag: "Legacy"
+    //
+    // Preserve the indentation and hierarchy as displayed by Azure.
+
+    var propertyIndent = trimmedLine.TakeWhile(char.IsWhiteSpace).Count();
+
+    if (propertyIndent > currentResourceIndent)
+    {
+        if (!propertyChanges.ContainsKey(currentResource))
+        {
+            propertyChanges[currentResource] = [];
+        }
+
+        // Ignore empty lines and purely decorative output
+        if (trimmed.Length > 0)
+        {
+            propertyChanges[currentResource].Add(trimmed);
+        }
     }
 }
 
@@ -73,13 +135,40 @@ foreach (var (category, resources) in changes)
     }
     else
     {
-        foreach (var resource in resources)
+        foreach (var resource in resources.Distinct())
         {
             report.AppendLine($"- `{resource}`");
         }
     }
 
     report.AppendLine();
+}
+
+// Property-level changes
+report.AppendLine("## Property-level changes");
+report.AppendLine();
+
+if (propertyChanges.Count == 0)
+{
+    report.AppendLine("No property-level changes captured.");
+}
+else
+{
+    foreach (var (resource, properties) in propertyChanges)
+    {
+        report.AppendLine($"### `{resource}`");
+        report.AppendLine();
+
+        report.AppendLine("```text");
+
+        foreach (var property in properties)
+        {
+            report.AppendLine(property);
+        }
+
+        report.AppendLine("```");
+        report.AppendLine();
+    }
 }
 
 // Diagnostics section
@@ -90,7 +179,8 @@ var diagnostics = Regex.Match(
     output,
     @"Diagnostics\s*\(\d+\):([\s\S]*)");
 
-if (diagnostics.Success)
+if (diagnostics.Success &&
+    !string.IsNullOrWhiteSpace(diagnostics.Groups[1].Value))
 {
     report.AppendLine("```text");
     report.AppendLine(diagnostics.Groups[1].Value.Trim());
