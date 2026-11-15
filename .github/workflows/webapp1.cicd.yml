@@ -11,7 +11,13 @@ on:
       - 'scripts/**'
       - '.github/workflows/**'
       
-  
+  push:
+    branches:
+      - main
+    paths:
+      - 'infra/app1/**'
+      - 'scripts/**'
+      - '.github/workflows/**'
 
 permissions:
   contents: read
