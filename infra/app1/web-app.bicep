@@ -71,4 +71,8 @@ resource staticWebApp1 'Microsoft.Web/staticSites@2023-12-01' = {
     tier: 'Free'
   }
   properties: {}
+  tags:{
+    owner: 'john'
+    env: 'dev'
+  }
 }
