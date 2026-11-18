@@ -56,9 +56,9 @@ jobs:
         uses: azure/cli@v2
         with:
          inlineScript: |
-            az account set --subscription "${{ secrets.AZURE_SUBSCRIPTION_ID }}"
+            az account set --subscription "${{ vars.AZURE_SUBSCRIPTION_ID }}"
             az deployment group what-if \
-            --resource-group "${{ secrets.AZURE_APP1_RESOURCE_GROUP }}"  \
+            --resource-group "${{ vars.AZURE_APP1_RESOURCE_GROUP }}"  \
             --template-file ./infra/app1/web-app.bicep \
             --parameters ./infra/app1/${{ matrix.environment }}.bicepparam \
             > whatif.txt 2>&1
