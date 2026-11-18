@@ -32,7 +32,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        environment: [dev, uat]
+        environment: [dev-validation, uat-validation]
 
     environment: ${{ matrix.environment }}-validation
 
