@@ -61,7 +61,7 @@ jobs:
             --resource-group "${{ vars.AZURE_APP1_RESOURCE_GROUP }}"  \
             --template-file ./infra/app1/web-app.bicep \
             --parameters ./infra/app1/${{ matrix.environment }}.bicepparam \
-   
+            --validation-level ProviderNoRbac
 
       - name:  Bicep deployment What-If
         uses: azure/cli@v2
@@ -72,6 +72,7 @@ jobs:
             --resource-group "${{ vars.AZURE_APP1_RESOURCE_GROUP }}"  \
             --template-file ./infra/app1/web-app.bicep \
             --parameters ./infra/app1/${{ matrix.environment }}.bicepparam \
+            --validation-level ProviderNoRbac
             > whatif.txt 2>&1
 
 
