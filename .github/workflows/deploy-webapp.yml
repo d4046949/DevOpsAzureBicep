@@ -36,6 +36,26 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
+      - name: Add deployment information
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          ACTOR: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          {
+            echo "# WebApp1 Deployment"
+            echo ""
+            echo "| Detail | Value |"
+            echo "|---|---|"
+            echo "| Branch | $BRANCH |"
+            echo "| Commit | \`$SHA\` |"
+            echo "| Triggered by | $ACTOR |"
+            echo "| Trigger | $EVENT |"
+            echo "| Commit message | $COMMIT_MESSAGE |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
   deploy_dev:
     name: Dev - Deploy Static Web App
     runs-on: ubuntu-latest
@@ -55,7 +75,7 @@ jobs:
 
       # Deploy static content to Azure
       - name: Deploy to Azure Static Web App
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
         id: azure_deploy
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
@@ -119,7 +139,7 @@ jobs:
 
       # Deploy static content to Azure
       - name: Deploy to Azure Static Web App
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
         id: azure_deploy
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
@@ -161,7 +181,7 @@ jobs:
 
   # Deploy static content to Azure
       - name: Deploy to Azure Static Web App
-        uses: Azure/static-web-apps-deploy@v1
+        uses: Azure/static-web-apps-deploy@1a947af9992250f3bc2e68ad0754c0b0c11566c9
         id: azure_deploy
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
