@@ -76,6 +76,27 @@ jobs:
             echo "Website: [$SITE_URL]($SITE_URL)"
           } >> "$GITHUB_STEP_SUMMARY"
 
+      - name: Health check
+        env:
+          SITE_URL: ${{ steps.azure_deploy.outputs.static_web_app_url }}
+        run: |
+          echo "Checking website: $SITE_URL"
+
+          for i in {1..10}; do
+            HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" "$SITE_URL")
+
+            if [ "$HTTP_STATUS" = "200" ]; then
+              echo "Health check passed! HTTP $HTTP_STATUS"
+              exit 0
+            fi
+
+            echo "Attempt $i: HTTP $HTTP_STATUS. Retrying in 10 seconds..."
+            sleep 10
+          done
+
+          echo "Health check failed after 10 attempts."
+          exit 1
+
   deploy_uat:
     name: UAT - Deploy Static Web App
 
